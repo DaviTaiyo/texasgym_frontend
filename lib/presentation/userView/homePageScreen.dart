@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:texasgym_1/presentation/paymentView/mercadopagoscreen.dart';
 import 'package:texasgym_1/presentation/paymentView/paymentScreen.dart';
 import 'package:texasgym_1/presentation/configView/settingsScreen.dart';
 import 'package:texasgym_1/presentation/userView/trainingSheetScreen.dart';
@@ -102,7 +103,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => PaymentOptionsScreen()),
+                  MaterialPageRoute(builder: (context) => MercadoPagoScreen()),//PaymentOptionsScreen()),
                 );
               },
             ),

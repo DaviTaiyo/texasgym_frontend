@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:texasgym_1/presentation/admView/paymentManagerScreen.dart';
 import 'package:texasgym_1/presentation/admView/userManageScreen.dart';
 import 'package:texasgym_1/presentation/configView/settingsScreen.dart';
