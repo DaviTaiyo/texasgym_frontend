@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:texasgym_1/presentation/views/termsServiceScreen.dart';
+import 'package:texasgym_1/View/views/termsServiceScreen.dart';
 
 class AboutAppScreen extends StatelessWidget {
   @override

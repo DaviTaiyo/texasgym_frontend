@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:texasgym_1/presentation/configView/aboutAppScreen.dart';
-import 'package:texasgym_1/presentation/configView/notificationScreen.dart';
-import 'package:texasgym_1/presentation/configView/privacySecurityScreen.dart';
+import 'package:texasgym_1/View/configView/aboutAppScreen.dart';
+import 'package:texasgym_1/View/configView/notificationScreen.dart';
+import 'package:texasgym_1/View/configView/privacySecurityScreen.dart';
 
 class SettingsScreen extends StatelessWidget {
   @override

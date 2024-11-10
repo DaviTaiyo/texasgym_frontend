@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:texasgym_1/presentation/views/loginScreen.dart';
+import 'package:texasgym_1/View/views/loginScreen.dart';
 
 void main() {
   runApp(MyApp());

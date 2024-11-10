@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:texasgym_1/presentation/paymentView/mercadopagoscreen.dart';
-import 'package:texasgym_1/presentation/paymentView/paymentScreen.dart';
-import 'package:texasgym_1/presentation/configView/settingsScreen.dart';
-import 'package:texasgym_1/presentation/userView/trainingSheetScreen.dart';
+import 'package:texasgym_1/View/paymentView/mercadopagoscreen.dart';
+import 'package:texasgym_1/View/configView/settingsScreen.dart';
+import 'package:texasgym_1/View/userView/trainingSheetScreen.dart';
 import 'dart:io';
 import 'profileScreen.dart';
-import 'package:texasgym_1/presentation/views/loginScreen.dart';
+import 'package:texasgym_1/View/views/loginScreen.dart';
 
 class HomePageScreen extends StatefulWidget {
   @override

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:texasgym_1/presentation/admView/paymentManagerScreen.dart';
-import 'package:texasgym_1/presentation/admView/userManageScreen.dart';
-import 'package:texasgym_1/presentation/configView/settingsScreen.dart';
+import 'package:texasgym_1/View/admView/paymentManagerScreen.dart';
+import 'package:texasgym_1/View/admView/userManageScreen.dart';
+import 'package:texasgym_1/View/configView/settingsScreen.dart';
 import 'dart:io';
-import 'package:texasgym_1/presentation/userView/profileScreen.dart';
-import 'package:texasgym_1/presentation/admView/workoutManagerScreen.dart';
-import 'package:texasgym_1/presentation/views/loginScreen.dart';
+import 'package:texasgym_1/View/userView/profileScreen.dart';
+import 'package:texasgym_1/View/admView/workoutManagerScreen.dart';
+import 'package:texasgym_1/View/views/loginScreen.dart';
 
 class AdminHomePageScreen extends StatefulWidget {
   @override
