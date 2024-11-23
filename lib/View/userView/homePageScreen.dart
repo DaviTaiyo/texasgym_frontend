@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:texasgym_1/Controller/Medida_controller.dart';
+import 'package:texasgym_1/Controller/Usuario_controller.dart';
+import 'package:texasgym_1/Model/Medida_model.dart';
+import 'package:texasgym_1/Model/Usuario_Model.dart';
 import 'package:texasgym_1/View/paymentView/mercadopagoscreen.dart';
 import 'package:texasgym_1/View/configView/settingsScreen.dart';
 import 'package:texasgym_1/View/userView/trainingSheetScreen.dart';
@@ -12,12 +17,22 @@ class HomePageScreen extends StatefulWidget {
 }
 
 class _HomePageScreenState extends State<HomePageScreen> {
+  final UsuarioController _usuarioController = UsuarioController();
+  final MedidaController _medidaController = MedidaController();
+  Usuario? _usuario;
+  List<Medida>? _medidas;
+  bool _isLoading = true;
+
   int treinosCompletados = 0;
   int caloriasQueimadas = 0;
   int horasDeTreino = 0;
 
-  String userName = 'Guilherme';
-  String userEmail = 'gui@email.com';
+  @override
+  void initState() {
+    super.initState();
+    _fetchUsuario();
+  }
+
   File? userProfileImage;
 
   void _updateProgress(int treinos, int calorias, int horas) {
@@ -28,17 +43,29 @@ class _HomePageScreenState extends State<HomePageScreen> {
     });
   }
 
+  // Função para calcular a idade com base na data de nascimento
+  int calcularIdade(DateTime dataNascimento) {
+    final hoje = DateTime.now();
+    int idade = hoje.year - dataNascimento.year;
+
+    if (hoje.month < dataNascimento.month ||
+        (hoje.month == dataNascimento.month && hoje.day < dataNascimento.day)) {
+      idade--;
+    }
+    return idade;
+  }
+
   Future<void> _navigateToProfile() async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => ProfileScreen(
-          name: userName,
-          phone: '123-456-7890',
-          email: userEmail,
-          age: 25,
-          height: 1.75,
-          weight: 70.0,
+          userId: _usuario?.id ?? 0,
+          name: _usuario?.nome ?? "Não disponível",
+          cpf: _usuario?.cpf ?? "Não disponivel",
+          phone: _usuario?.telefone ?? "Não disponível",
+          email: _usuario?.email ?? "Não disponível",
+          birthDate: _usuario?.dataNascimento ?? DateTime.now(), // Passa a data de nascimento
           profileImage: userProfileImage,
         ),
       ),
@@ -46,9 +73,8 @@ class _HomePageScreenState extends State<HomePageScreen> {
 
     if (result != null) {
       setState(() {
-        userName = result['name'];
-        userEmail = result['email'];
-        userProfileImage = result['profileImage'];
+        _usuario?.nome;
+        _usuario?.email;
       });
     }
   }
@@ -57,7 +83,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Home'),
+        title: Text('Texas Gym'),
         backgroundColor: Colors.blue,
       ),
       drawer: Drawer(
@@ -65,13 +91,15 @@ class _HomePageScreenState extends State<HomePageScreen> {
           padding: EdgeInsets.zero,
           children: [
             UserAccountsDrawerHeader(
-              accountName: Text(userName),
-              accountEmail: Text(userEmail),
+              accountName: Text(_usuario?.nome ?? "Não disponível"),
+              accountEmail: Text(_usuario?.email ?? "Não disponível"),
               currentAccountPicture: CircleAvatar(
                 backgroundImage: userProfileImage != null
                     ? FileImage(userProfileImage!)
                     : AssetImage('assets/default_avatar.png') as ImageProvider,
-                child: userProfileImage == null ? Text(userName[0]) : null,
+                child: userProfileImage == null
+                    ? Text((_usuario?.nome ?? "Não disponível")[0])
+                    : null,
               ),
               decoration: BoxDecoration(
                 color: Colors.blue,
@@ -102,7 +130,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => MercadoPagoScreen()),//PaymentOptionsScreen()),
+                  MaterialPageRoute(builder: (context) => MercadoPagoScreen()),
                 );
               },
             ),
@@ -127,64 +155,81 @@ class _HomePageScreenState extends State<HomePageScreen> {
           ],
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Bem-vindo de volta!',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              SizedBox(height: 10),
-              Text(
-                'Aqui estão suas atividades recentes:',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[600],
-                ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Dicas Motivacionais',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              SizedBox(height: 10),
-              Container(
-                height: 150,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildMotivationalCard('Mantenha-se Hidratado durante o treino!'),
-                    _buildMotivationalCard('Não esqueça de alongar antes e depois dos treinos.'),
-                    _buildMotivationalCard('Progrida aos poucos para evitar lesões.'),
+                    Row(
+                      children: [
+                        Text(
+                          'Bem-vindo ',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        Text(
+                          _usuario?.nome ?? "Não disponível",
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      'Aqui estão suas atividades recentes:',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      'Dicas Motivacionais',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Container(
+                      height: 150,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: [
+                          _buildMotivationalCard(
+                              'Mantenha-se Hidratado durante o treino!'),
+                          _buildMotivationalCard(
+                              'Não esqueça de alongar antes e depois dos treinos.'),
+                          _buildMotivationalCard(
+                              'Progrida aos poucos para evitar lesões.'),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      'Resumo do Progresso',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    _buildProgressSummary(),
                   ],
                 ),
               ),
-              SizedBox(height: 20),
-              Text(
-                'Resumo do Progresso',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              SizedBox(height: 10),
-              _buildProgressSummary(),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 
@@ -269,43 +314,44 @@ class _HomePageScreenState extends State<HomePageScreen> {
     );
   }
 
-  Widget _buildProgressCard(String title, String data, IconData icon, Color iconColor) {
-  return Card(
-    elevation: 2, // Reduzindo a elevação para um sombreamento mais sutil
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: iconColor.withOpacity(0.2),
-            ),
-            padding: EdgeInsets.all(8),
-            child: Icon(icon, color: iconColor, size: 40),
-          ),
-          SizedBox(width: 20),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
+  Widget _buildProgressCard(
+      String title, String data, IconData icon, Color iconColor) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: iconColor.withOpacity(0.2),
               ),
-              SizedBox(height: 5),
-              Text(
-                data,
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.black54,
-                  fontWeight: FontWeight.w500,
+              padding: EdgeInsets.all(8),
+              child: Icon(icon, color: iconColor, size: 40),
+            ),
+            SizedBox(width: 20),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                SizedBox(height: 5),
+                Text(
+                  data,
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.black54,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
@@ -314,5 +360,37 @@ class _HomePageScreenState extends State<HomePageScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _fetchUsuario() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('jwt_token');
+
+    if (token != null) {
+      Usuario? usuario = await _usuarioController.getUsuario(token);
+      if (usuario != null) {
+        _fetchMedidas(usuario.id!); // Carrega as medidas do usuário logado
+      }
+      setState(() {
+        _usuario = usuario;
+      });
+    } else {
+      print("Token JWT não encontrado.");
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _fetchMedidas(int userId) async {
+    List<Medida>? medidas = await _medidaController.getMedidasByUserId(userId);
+    setState(() {
+      _medidas = medidas;
+    });
   }
 }

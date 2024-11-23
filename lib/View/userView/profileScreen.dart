@@ -1,24 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:texasgym_1/View/userView/EditProfileScreen.dart';
 import 'dart:io';
+import 'package:texasgym_1/View/userView/Medidas_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String name;
   final String phone;
   final String email;
-  final int age;
-  final double height;
-  final double weight;
+  final String cpf;
+  final DateTime birthDate; // Alterado para usar a data de nascimento
   final File? profileImage;
+  final int userId;
 
   ProfileScreen({
     required this.name,
     required this.phone,
     required this.email,
-    required this.age,
-    required this.height,
-    required this.weight,
+    required this.cpf,
+    required this.birthDate, // Usando a data de nascimento diretamente
     required this.profileImage,
+    required this.userId,
   });
 
   @override
@@ -28,10 +31,9 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   late String name;
   late String phone;
+  late String cpf;
   late String email;
-  late int age;
-  late double height;
-  late double weight;
+  late DateTime birthDate; // Alterado para armazenar a data de nascimento
   late File? profileImage;
 
   final ImagePicker _picker = ImagePicker();
@@ -42,10 +44,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     name = widget.name;
     phone = widget.phone;
     email = widget.email;
-    age = widget.age;
-    height = widget.height;
-    weight = widget.weight;
+    cpf = widget.cpf;
+    birthDate = widget.birthDate;
     profileImage = widget.profileImage;
+  }
+
+  int _calculateAge(DateTime birthDate) {
+    final currentDate = DateTime.now();
+    int age = currentDate.year - birthDate.year;
+    if (currentDate.month < birthDate.month ||
+        (currentDate.month == birthDate.month && currentDate.day < birthDate.day)) {
+      age--;
+    }
+    return age;
   }
 
   @override
@@ -66,15 +77,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     radius: 50,
                     backgroundImage: profileImage != null
                         ? FileImage(profileImage!)
-                        : AssetImage('assets/default_avatar.png') as ImageProvider,
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: IconButton(
-                      icon: Icon(Icons.camera_alt),
-                      onPressed: _pickImage,
-                    ),
+                        : AssetImage('assets/default_avatar.png')
+                            as ImageProvider,
                   ),
                 ],
               ),
@@ -84,141 +88,71 @@ class _ProfileScreenState extends State<ProfileScreen> {
               leading: Icon(Icons.person),
               title: Text('Nome'),
               subtitle: Text(name),
-              trailing: IconButton(
-                icon: Icon(Icons.edit),
-                onPressed: () => _editField(context, 'Nome', name, (value) {
-                  setState(() {
-                    name = value;
-                  });
-                }),
-              ),
             ),
             ListTile(
               leading: Icon(Icons.phone),
               title: Text('Telefone'),
               subtitle: Text(phone),
-              trailing: IconButton(
-                icon: Icon(Icons.edit),
-                onPressed: () => _editField(context, 'Telefone', phone, (value) {
-                  setState(() {
-                    phone = value;
-                  });
-                }),
-              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.document_scanner),
+              title: Text('CPF'),
+              subtitle: Text(cpf),
             ),
             ListTile(
               leading: Icon(Icons.email),
               title: Text('Email'),
               subtitle: Text(email),
-              trailing: IconButton(
-                icon: Icon(Icons.edit),
-                onPressed: () => _editField(context, 'Email', email, (value) {
-                  setState(() {
-                    email = value;
-                  });
-                }),
-              ),
             ),
             ListTile(
               leading: Icon(Icons.cake),
               title: Text('Idade'),
-              subtitle: Text('$age anos'),
-              trailing: IconButton(
-                icon: Icon(Icons.edit),
-                onPressed: () => _editField(context, 'Idade', '$age', (value) {
-                  setState(() {
-                    age = int.parse(value);
-                  });
-                }),
-              ),
-            ),
-            ListTile(
-              leading: Icon(Icons.height),
-              title: Text('Altura'),
-              subtitle: Text('${height.toStringAsFixed(2)} m'),
-              trailing: IconButton(
-                icon: Icon(Icons.edit),
-                onPressed: () => _editField(context, 'Altura', height.toString(), (value) {
-                  setState(() {
-                    height = double.parse(value);
-                  });
-                }),
-              ),
-            ),
-            ListTile(
-              leading: Icon(Icons.fitness_center),
-              title: Text('Peso'),
-              subtitle: Text('${weight.toStringAsFixed(1)} kg'),
-              trailing: IconButton(
-                icon: Icon(Icons.edit),
-                onPressed: () => _editField(context, 'Peso', weight.toString(), (value) {
-                  setState(() {
-                    weight = double.parse(value);
-                  });
-                }),
-              ),
+              subtitle: Text('${_calculateAge(birthDate)} anos'),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.save),
-        onPressed: () {
-          Navigator.pop(context, {
-            'name': name,
-            'phone': phone,
-            'email': email,
-            'age': age,
-            'height': height,
-            'weight': weight,
-            'profileImage': profileImage,
-          });
-        },
-      ),
-    );
-  }
-
-  Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        profileImage = File(pickedFile.path);
-      });
-    }
-  }
-
-  void _editField(BuildContext context, String fieldName, String currentValue, Function(String) onValueChanged) {
-    TextEditingController controller = TextEditingController(text: currentValue);
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Editar $fieldName'),
-          content: TextField(
-            controller: controller,
-            keyboardType: fieldName == 'Idade' ? TextInputType.number : TextInputType.text,
-            decoration: InputDecoration(
-              labelText: fieldName,
-            ),
+      floatingActionButton: SpeedDial(
+        animatedIcon: AnimatedIcons.menu_close,
+        backgroundColor: Colors.blue,
+        overlayColor: Colors.black,
+        overlayOpacity: 0.5,
+        spacing: 10,
+        spaceBetweenChildren: 10,
+        children: [
+          SpeedDialChild(
+            child: Icon(Icons.dashboard),
+            label: "Medidas",
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MedidasScreen(userId: widget.userId),
+                ),
+              );
+            },
           ),
-          actions: [
-            TextButton(
-              child: Text('Cancelar'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Salvar'),
-              onPressed: () {
-                onValueChanged(controller.text);
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
+          SpeedDialChild(
+            child: Icon(Icons.edit),
+            label: 'Editar Perfil',
+            onTap: () async {
+              final updatedData = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EditProfileScreen(
+                    userId: widget.userId, // Passa o ID do usuário
+                    name: name,
+                    cpf: cpf,
+                    phone: phone,
+                    email: email,
+                    birthDate: birthDate, // Passa a data de nascimento para edição
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }

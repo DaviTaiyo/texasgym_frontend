@@ -1,41 +1,22 @@
 class Medida {
-  int? id;
-  int usuarioId;
-  double altura;
-  double peso;
-  double gorduraCorporal;
-  DateTime? dataMedida;
+  final int? id;
+  final double? altura;
+  final double? peso;
+  final double? gorduraCorporal;
+  final DateTime? dataMedida;
 
-  Medida({
-    this.id,
-    required this.usuarioId,
-    required this.altura,
-    required this.peso,
-    required this.gorduraCorporal,
-    this.dataMedida,
-  });
+  Medida({this.id, this.altura, this.peso, this.gorduraCorporal, this.dataMedida});
 
   factory Medida.fromJson(Map<String, dynamic> json) {
     return Medida(
       id: json['id'],
-      usuarioId: json['usuario_id'],
-      altura: (json['altura'] as num).toDouble(),
-      peso: (json['peso'] as num).toDouble(),
-      gorduraCorporal: (json['gordura_corporal'] as num).toDouble(),
-      dataMedida: json['data_medida'] != null
-          ? DateTime.parse(json['data_medida'])
+      altura: json['altura']?.toDouble(),
+      peso: json['peso']?.toDouble(),
+      gorduraCorporal: json['gorduraCorporal']?.toDouble(),
+      dataMedida: json['dataMedida'] != null
+          ? DateTime.parse(json['dataMedida'])
           : null,
     );
   }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'usuario_id': usuarioId,
-      'altura': altura,
-      'peso': peso,
-      'gordura_corporal': gorduraCorporal,
-      'data_medida': dataMedida?.toIso8601String(),
-    };
-  }
 }
+

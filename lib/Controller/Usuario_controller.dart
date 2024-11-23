@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:texasgym_1/Model/Usuario_Model.dart';
 
 class UsuarioController {
@@ -48,10 +49,8 @@ class UsuarioController {
   }
 }
 
-
-
   // Método para login
-  Future<Usuario?> login(String email, String senha) async {
+Future<String?> login(String email, String senha) async {
   final url = Uri.parse('$apiUrl/login');
   final client = _getHttpClient();
 
@@ -73,16 +72,11 @@ class UsuarioController {
       final responseData = json.decode(response.body);
       final token = responseData['token'];
 
-      // Decodificar o token JWT para extrair as informações do usuário
-      final jwt = JWT.decode(token); // Decodifica o token sem verificar a assinatura
-      final usuarioData = jwt.payload; // Pega os dados decodificados do payload do token
+      // Salva o token usando SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('jwt_token', token);
 
-      // Extrair informações específicas do usuário
-      return Usuario(
-        email: usuarioData['email'],
-        nome: usuarioData['nome'],
-        administrador: usuarioData['administrador'] ?? false,
-      );
+      return token; // Retorna o token para indicar que o login foi bem-sucedido
     } else {
       return null; // Retorna null em caso de erro de autenticação
     }
@@ -93,7 +87,6 @@ class UsuarioController {
     client.close();
   }
 }
-
 
   // Método para atualizar a senha do usuário
   Future<String?> atualizarSenha(int id, String novaSenha) async {
@@ -196,4 +189,95 @@ class UsuarioController {
       return "Erro: Resposta do servidor está vazia.";
     }
   }
+
+  //Função para pegar todos os usuarios
+  Future<Usuario?> getUsuario(String token) async {
+    final url = Uri.parse('$apiUrl/me');
+    final client = _getHttpClient();
+
+    try {
+      final response = await client.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token', // Inclui o token no cabeçalho
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return Usuario.fromJson(data); // Converte a resposta JSON para um objeto Usuario
+      } else {
+        print("Erro ao buscar usuário: ${response.body}");
+        return null;
+      }
+    } catch (e) {
+      print("Erro de conexão: $e");
+      return null;
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<Usuario?> getUserByToken(String token) async {
+    final response = await http.get(
+      Uri.parse('$apiUrl/me'), // Certifique-se de que o endpoint seja correto
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      // Retorna o objeto Usuario com base na resposta JSON
+      return Usuario.fromJson(jsonDecode(response.body));
+    } else if (response.statusCode == 401) {
+      print('Token inválido ou expirado');
+      return null;
+    } else {
+      print('Erro ao buscar usuário: ${response.statusCode}');
+      return null;
+    }
+  }
+
+Future<bool> atualizarUsuario({
+  required String name,
+  required String phone,
+  required String email,
+  required String cpf,
+  required DateTime birthDate,
+  required int userId, // Adiciona o ID do usuário
+}) async {
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('jwt_token');
+
+  if (token == null) {
+    throw Exception('Token JWT não encontrado.');
+  }
+  final url = Uri.parse('$apiUrl/atualizar/$userId'); // Inclui o ID na rota
+  final body = jsonEncode({
+  'nome': name,
+  'telefone': phone,
+  'email': email,
+  'cpf': cpf,
+  'dataNascimento': DateFormat('yyyy-MM-dd').format(birthDate),
+  'senha': "1"
+});
+
+  try {
+    final response = await _getHttpClient().put(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: body,
+    );
+
+    return response.statusCode == 200;
+  } catch (e) {
+    print('Erro ao atualizar perfil: $e');
+    return false;
+  }
+}
 }

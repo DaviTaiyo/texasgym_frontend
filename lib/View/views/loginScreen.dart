@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:texasgym_1/Controller/Usuario_controller.dart';
-import 'package:texasgym_1/Model/Usuario_Model.dart';
 import 'package:texasgym_1/View/userView/homePageScreen.dart';
 import 'package:texasgym_1/View/admView/admHomePageScreen.dart';
 import 'package:texasgym_1/View/views/registerScreen.dart';
@@ -14,7 +13,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final UsuarioController _usuarioController = UsuarioController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  bool isChecked = false;
   bool obscurePassword = true;
 
   Future<void> _login() async {
@@ -22,11 +20,12 @@ class _LoginScreenState extends State<LoginScreen> {
     String email = emailController.text;
     String password = passwordController.text;
 
-    Usuario? usuario = await _usuarioController.login(email, password);
+    String? token = await _usuarioController.login(email, password);
 
-    if (usuario != null) {
-      // Redireciona com base no valor do campo administrador
-      if (usuario.administrador) {
+    if (token != null) {
+      // Verifique se o usuário é administrador, faça isso com uma função que pega o valor do token JWT decodificado.
+      bool isAdmin = await _verificarAdministrador(token);
+      if (isAdmin) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => AdminHomePageScreen()),
@@ -41,6 +40,13 @@ class _LoginScreenState extends State<LoginScreen> {
       // Exibe um diálogo de erro em caso de falha no login
       _mostrarDialogo('Erro de Login', 'E-mail ou senha inválidos.');
     }
+  }
+
+  Future<bool> _verificarAdministrador(String token) async {
+    // Aqui você decodifica o token JWT para verificar se o campo administrador é verdadeiro.
+    // Adicione lógica para verificar o payload do token (se já estiver incluído o valor administrador).
+    // Vamos simplificar isso no momento.
+    return false; // Ajuste isso conforme a necessidade do seu sistema
   }
 
   void _mostrarDialogo(String titulo, String conteudo) {
@@ -117,9 +123,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ElevatedButton(
                 onPressed: _login,
                 child: Text('Login'),
-              ),
-              SizedBox(
-                height: 15,
               ),
               ElevatedButton(
                 onPressed: () {

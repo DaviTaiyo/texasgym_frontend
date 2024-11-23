@@ -17,17 +17,20 @@ class _AdminHomePageScreenState extends State<AdminHomePageScreen> {
   String userEmail = 'adm@gmail.com';
   File? userProfileImage;
 
+  // Define a data de nascimento para testes
+  DateTime userBirthDate = DateTime(1985, 10, 15);
+
   Future<void> _navigateToProfile() async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => ProfileScreen(
+          userId: 2,
           name: userName,
-          phone: '123-456-7890',
+          cpf: "123",
+          phone: "123",
           email: userEmail,
-          age: 25,
-          height: 1.75,
-          weight: 70.0,
+          birthDate: userBirthDate, // Passa a data de nascimento
           profileImage: userProfileImage,
         ),
       ),
@@ -97,7 +100,7 @@ class _AdminHomePageScreenState extends State<AdminHomePageScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => UserManagerScreen())
+                  MaterialPageRoute(builder: (context) => UserManagerScreen()),
                 );
               },
             ),
