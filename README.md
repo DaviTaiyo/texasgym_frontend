@@ -14,3 +14,6 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+ # Aviso de problema caso tentar emular com um emulador sem aceleração de hardware
+Na tela ExerciciosView.dart pode causar exception devido a um problema com a criação de uma Platform View, que é uma integração entre o Flutter e componentes nativos (como o WebView). No caso, a exceção ocorre porque o tipo de Platform View (com.pichillilorenzo/flutter_inappwebview) não está registrado corretamente ou está sendo utilizado em um contexto que não suporta isso, como em dispositivos emuladores sem suporte ao Hardware Acceleration ou configurações específicas.

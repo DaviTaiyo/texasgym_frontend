@@ -16,7 +16,7 @@ class Exercicio {
       id: json['id'],
       nome: json['nome'],
       descricao: json['descricao'],
-      linkYoutube: json['link_youtube'],
+      linkYoutube: json['linkYoutube'],
     );
   }
 
@@ -25,7 +25,7 @@ class Exercicio {
       'id': id,
       'nome': nome,
       'descricao': descricao,
-      'link_youtube': linkYoutube,
+      'linkYoutube': linkYoutube,
     };
   }
 }

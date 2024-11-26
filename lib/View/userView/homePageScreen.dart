@@ -4,9 +4,12 @@ import 'package:texasgym_1/Controller/Medida_controller.dart';
 import 'package:texasgym_1/Controller/Usuario_controller.dart';
 import 'package:texasgym_1/Model/Medida_model.dart';
 import 'package:texasgym_1/Model/Usuario_Model.dart';
+import 'package:texasgym_1/View/TreinoView/FichaDeTreino.dart';
+import 'package:texasgym_1/View/exerciciosView/ExerciciosView.dart';
+import 'package:texasgym_1/View/fichaView/FichaView.dart';
 import 'package:texasgym_1/View/paymentView/mercadopagoscreen.dart';
 import 'package:texasgym_1/View/configView/settingsScreen.dart';
-import 'package:texasgym_1/View/userView/trainingSheetScreen.dart';
+import 'package:texasgym_1/View/TreinoView/TreinoView.dart';
 import 'dart:io';
 import 'profileScreen.dart';
 import 'package:texasgym_1/View/views/loginScreen.dart';
@@ -43,39 +46,31 @@ class _HomePageScreenState extends State<HomePageScreen> {
     });
   }
 
-  // Função para calcular a idade com base na data de nascimento
-  int calcularIdade(DateTime dataNascimento) {
-    final hoje = DateTime.now();
-    int idade = hoje.year - dataNascimento.year;
-
-    if (hoje.month < dataNascimento.month ||
-        (hoje.month == dataNascimento.month && hoje.day < dataNascimento.day)) {
-      idade--;
-    }
-    return idade;
-  }
-
   Future<void> _navigateToProfile() async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ProfileScreen(
-          userId: _usuario?.id ?? 0,
-          name: _usuario?.nome ?? "Não disponível",
-          cpf: _usuario?.cpf ?? "Não disponivel",
-          phone: _usuario?.telefone ?? "Não disponível",
-          email: _usuario?.email ?? "Não disponível",
-          birthDate: _usuario?.dataNascimento ?? DateTime.now(), // Passa a data de nascimento
-          profileImage: userProfileImage,
+    if (_usuario != null) {
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProfileScreen(
+            userId: _usuario!.id!,
+            name: _usuario!.nome!,
+            cpf: _usuario!.cpf!,
+            phone: _usuario!.telefone!,
+            email: _usuario!.email!,
+            birthDate: _usuario!.dataNascimento!,
+            profileImage: userProfileImage,
+          ),
         ),
-      ),
-    );
+      );
 
-    if (result != null) {
-      setState(() {
-        _usuario?.nome;
-        _usuario?.email;
-      });
+      if (result != null) {
+        setState(() {
+          _usuario?.nome = result['name'];
+          _usuario?.email = result['email'];
+        });
+      }
+    } else {
+      print("Usuário não carregado.");
     }
   }
 
@@ -110,18 +105,41 @@ class _HomePageScreenState extends State<HomePageScreen> {
               title: Text('Perfil'),
               onTap: _navigateToProfile,
             ),
+            // ListTile(
+            //   leading: Icon(Icons.fitness_center, color: Colors.black),
+            //   title: Text('Treinos'),
+            //   onTap: () {
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(
+            //         builder: (context) => TrainingSheetScreen(
+            //           fichaId: _usuario?.id ??
+            //               0, // Substitua _usuario.id pelo ID correto da ficha
+            //         ),
+            //       ),
+            //     );
+            //   },
+            // ),
             ListTile(
-              leading: Icon(Icons.fitness_center, color: Colors.black),
-              title: Text('Treinos'),
+              leading: Icon(Icons.note_alt_rounded, color: Colors.black),
+              title: Text('Fichas'),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => TrainingSheetScreen(
-                      onTrainingCompleted: _updateProgress,
+                if (_usuario != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => UserFichasScreen(
+                        userId: _usuario!.id!,
+                        name: _usuario!.nome!,
+                        phone: _usuario!.telefone!,
+                        email: _usuario!.email!,
+                        cpf: _usuario!.cpf!,
+                      ),
                     ),
-                  ),
-                );
+                  );
+                } else {
+                  print("Usuário não carregado.");
+                }
               },
             ),
             ListTile(
@@ -131,6 +149,24 @@ class _HomePageScreenState extends State<HomePageScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => MercadoPagoScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.airline_seat_recline_extra_rounded,
+                  color: Colors.black),
+              title: Text('Exercícios'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => FichaTreinoScreen(
+                        userId: _usuario!.id!,
+                        name: _usuario!.nome!,
+                        phone: _usuario!.telefone!,
+                        email: _usuario!.email!,
+                        cpf: _usuario!.cpf!),
+                  ),
                 );
               },
             ),
@@ -191,41 +227,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
                         color: Colors.grey[600],
                       ),
                     ),
-                    SizedBox(height: 20),
-                    Text(
-                      'Dicas Motivacionais',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    Container(
-                      height: 150,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: [
-                          _buildMotivationalCard(
-                              'Mantenha-se Hidratado durante o treino!'),
-                          _buildMotivationalCard(
-                              'Não esqueça de alongar antes e depois dos treinos.'),
-                          _buildMotivationalCard(
-                              'Progrida aos poucos para evitar lesões.'),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    Text(
-                      'Resumo do Progresso',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    _buildProgressSummary(),
+
                   ],
                 ),
               ),

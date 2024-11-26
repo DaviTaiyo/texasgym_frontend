@@ -1,51 +1,65 @@
+import 'package:texasgym_1/Model/exercicios_Model.dart';
+
 class Treino {
-  int? id;
-  int fichaId;
-  int exerciciosId;
+  int? id; // Permitir null
+  int? fichaId; // Permitir null
   String nome;
-  int? repeticoes;
-  String? diasTreino;
-  double? pesoUsado;
-  int? tempoDescanso;
-  String? observacao;
+  int? repeticoes; // Permitir null
+  String? diasTreino; // Permitir null
+  double? pesoUsado; // Permitir null
+  int? tempoDescanso; // Permitir null
+  String? observacao; // Permitir null
+  List<Exercicio>? exercicios; // Lista de exercícios associados
 
   Treino({
     this.id,
-    required this.fichaId,
-    required this.exerciciosId,
+    this.fichaId,
     required this.nome,
     this.repeticoes,
     this.diasTreino,
     this.pesoUsado,
     this.tempoDescanso,
     this.observacao,
+    this.exercicios,
   });
 
   factory Treino.fromJson(Map<String, dynamic> json) {
     return Treino(
-      id: json['id'],
-      fichaId: json['ficha_id'],
-      exerciciosId: json['exercicios_id'],
+      id: json['id'] as int?, // Permitir null
+      fichaId: json['fichaId'] as int?, // Permitir null
       nome: json['nome'],
-      repeticoes: json['repeticoes'],
-      diasTreino: json['dias_treino'],
-      pesoUsado: (json['peso_usado'] as num?)?.toDouble(),
-      tempoDescanso: json['tempo_descanso'],
-      observacao: json['observacao'],
+      repeticoes: json['repeticoes'] as int?, // Permitir null
+      diasTreino: json['diasTreino'], // Permitir null
+      pesoUsado: (json['pesoUsado'] as num?)?.toDouble(), // Permitir null
+      tempoDescanso: json['tempoDescanso'] as int?, // Permitir null
+      observacao: json['observacao'], // Permitir null
+      exercicios: json['exercicios'] != null
+          ? (json['exercicios'] as List)
+              .map((e) => Exercicio.fromJson(e))
+              .toList()
+          : [],
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'ficha_id': fichaId,
-      'exercicios_id': exerciciosId,
+    final Map<String, dynamic> json = {
+      'fichaid': fichaId,
       'nome': nome,
       'repeticoes': repeticoes,
-      'dias_treino': diasTreino,
-      'peso_usado': pesoUsado,
-      'tempo_descanso': tempoDescanso,
+      'diasTreino': diasTreino,
+      'pesoUsado': pesoUsado,
+      'tempoDescanso': tempoDescanso,
       'observacao': observacao,
     };
+
+    if (id != null) {
+      json['id'] = id;
+    }
+
+    if (exercicios != null && exercicios!.isNotEmpty) {
+      json['exercicios'] = exercicios!.map((e) => e.toJson()).toList();
+    }
+
+    return json;
   }
 }

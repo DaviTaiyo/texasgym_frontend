@@ -50,7 +50,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String? resultado = await _usuarioController.registrarUsuario(novoUsuario);
 
   if (resultado == "sucesso") {
-    // Exibe mensagem de sucesso e navega para a página de login após o usuário confirmar
     _mostrarDialogo("Sucesso", "Usuário registrado com sucesso!", onOkPressed: () {
       Navigator.pushReplacement(
         context,
@@ -58,7 +57,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       );
     });
   } else {
-    // Exibe o erro retornado pelo controlador
     _mostrarDialogo("Alerta", resultado ?? 'Falha ao registrar o usuário.');
   }
 }

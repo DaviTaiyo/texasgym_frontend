@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:texasgym_1/Controller/Medida_controller.dart';
 import 'package:texasgym_1/Model/Medida_model.dart';
-import 'package:texasgym_1/View/userView/CriarMedidasScreen.dart';
+import 'package:texasgym_1/View/MedidasView/CriarMedidasScreen.dart';
 
 class MedidasScreen extends StatefulWidget {
   final int userId;

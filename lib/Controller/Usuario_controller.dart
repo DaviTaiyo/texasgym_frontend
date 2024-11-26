@@ -33,9 +33,8 @@ class UsuarioController {
     );
 
     if (response.statusCode == 200) {
-      return "sucesso"; // Sinaliza que o registro foi bem-sucedido
+      return "sucesso";
     } else if (response.statusCode == 400) {
-      // Se o backend retorna código 400 com mensagem específica
       final errorResponse = response.body;
       return errorResponse;
     } else {

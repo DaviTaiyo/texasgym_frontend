@@ -3,7 +3,7 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:texasgym_1/View/userView/EditProfileScreen.dart';
 import 'dart:io';
-import 'package:texasgym_1/View/userView/Medidas_screen.dart';
+import 'package:texasgym_1/View/MedidasView/Medidas_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String name;
