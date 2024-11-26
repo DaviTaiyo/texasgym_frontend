@@ -7,9 +7,8 @@ import 'package:texasgym_1/Model/Usuario_Model.dart';
 import 'package:texasgym_1/View/TreinoView/FichaDeTreino.dart';
 import 'package:texasgym_1/View/admView/listUserView.dart';
 import 'package:texasgym_1/View/admView/paymentManagerScreen.dart';
-import 'package:texasgym_1/View/admView/workoutManagerScreen.dart';
 import 'package:texasgym_1/View/fichaView/FichaView.dart';
-import 'package:texasgym_1/View/paymentView/mercadopagoscreen.dart';
+import 'package:texasgym_1/View/userView/UserPaymentScreen.dart';
 import 'dart:io';
 import 'profileScreen.dart';
 import 'package:texasgym_1/View/views/loginScreen.dart';
@@ -139,17 +138,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
             ),
             if (_usuario?.professor == true) ...[
               ListTile(
-                leading: Icon(Icons.fitness_center, color: Colors.black),
-                title: Text('Criar Treinos'),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => SendTrainingScreen()),
-                  );
-                },
-              ),
-              ListTile(
                 leading: Icon(Icons.payment, color: Colors.black),
                 title: Text('Gerenciar Pagamentos'),
                 onTap: () {
@@ -157,6 +145,19 @@ class _HomePageScreenState extends State<HomePageScreen> {
                     context,
                     MaterialPageRoute(
                         builder: (context) => PaymentManagementScreen()),
+                  );
+                },
+              ),
+            ],
+            if (_usuario?.professor != true) ...[
+              ListTile(
+                leading: Icon(Icons.payment, color: Colors.black),
+                title: Text('Ver meus pagamentos'),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => UserPaymentScreen()),
                   );
                 },
               ),
@@ -203,17 +204,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
                     SizedBox(height: 10),
                     if (_usuario!.professor == true) ...[
                       _buildAdminOptionCard(
-                        'Criar Treinos para Usuários',
-                        Icons.fitness_center,
-                        () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => SendTrainingScreen()),
-                          );
-                        },
-                      ),
-                      _buildAdminOptionCard(
                         'Gerenciar Pagamentos dos Usuários',
                         Icons.payment,
                         () {
@@ -226,26 +216,17 @@ class _HomePageScreenState extends State<HomePageScreen> {
                         },
                       ),
                       _buildAdminOptionCard(
-                        'Ver Usuarios',
+                        'Ver e Editar Usuarios',
                         Icons.person,
                         () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>
-                                    UserListScreen()),
+                                builder: (context) => UserListScreen()),
                           );
                         },
                       ),
                     ],
-                    SizedBox(height: 20),
-                    Text(
-                      'Aqui estão suas atividades recentes:',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey[600],
-                      ),
-                    ),
                   ],
                 ),
               ),

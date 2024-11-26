@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:texasgym_1/Controller/Usuario_controller.dart';
 import 'package:texasgym_1/View/userView/homePageScreen.dart';
-import 'package:texasgym_1/View/admView/admHomePageScreen.dart';
 import 'package:texasgym_1/View/views/registerScreen.dart';
 
 class LoginScreen extends StatefulWidget {

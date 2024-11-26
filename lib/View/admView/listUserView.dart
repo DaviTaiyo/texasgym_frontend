@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:texasgym_1/Controller/Usuario_controller.dart';
 import 'package:texasgym_1/Model/Usuario_Model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:texasgym_1/View/admView/EditUserProfile.dart';
+import 'package:texasgym_1/View/admView/EditOptionView.dart';
 
 class UserListScreen extends StatefulWidget {
   @override
@@ -80,18 +80,13 @@ class _UserListScreenState extends State<UserListScreen> {
                     ),
                     trailing: Icon(Icons.edit),
                     onTap: () {
-                      // Navegar para a tela de edição ao selecionar um usuário
+                      // Navegar para a tela de opções ao selecionar um usuário
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => EditUserScreen(usuario: usuario),
+                          builder: (context) => EditOptionsScreen(usuario: usuario),
                         ),
-                      ).then((_) {
-                        // Atualiza a lista após edição
-                        setState(() {
-                          _usuariosFuture = _fetchUsuarios();
-                        });
-                      });
+                      );
                     },
                   ),
                 );
