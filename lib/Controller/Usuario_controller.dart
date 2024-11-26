@@ -49,7 +49,7 @@ class UsuarioController {
 }
 
   // Método para login
-Future<String?> login(String email, String senha) async {
+  Future<Map<String, dynamic>?> login(String email, String senha) async {
   final url = Uri.parse('$apiUrl/login');
   final client = _getHttpClient();
 
@@ -67,16 +67,27 @@ Future<String?> login(String email, String senha) async {
       body: body,
     );
 
+    // Log de depuração
+    print('Status Code: ${response.statusCode}');
+    print('Response Body: ${response.body}');
+
     if (response.statusCode == 200) {
       final responseData = json.decode(response.body);
-      final token = responseData['token'];
 
-      // Salva o token usando SharedPreferences
+      // Verificar e logar as chaves presentes no responseData
+      print('Response Data: $responseData');
+
+
+      final token = responseData['token'];
+      final isProfessor = responseData['professor'];
+
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('jwt_token', token);
+      await prefs.setBool('professor', isProfessor);
 
-      return token; // Retorna o token para indicar que o login foi bem-sucedido
+      return responseData; // Retorna os dados do login
     } else {
+      print('Erro no login: ${response.body}');
       return null; // Retorna null em caso de erro de autenticação
     }
   } catch (e) {
@@ -141,7 +152,7 @@ Future<String?> login(String email, String senha) async {
   }
 
   // Método para listar todos os usuários
-  Future<List<Usuario>?> listarUsuarios() async {
+  Future<List<Usuario>?> listarUsuarios(String token) async {
     final url = Uri.parse('$apiUrl/listar');
     final client = _getHttpClient();
 
@@ -150,6 +161,7 @@ Future<String?> login(String email, String senha) async {
         url,
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
         },
       );
 

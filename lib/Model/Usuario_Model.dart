@@ -5,8 +5,8 @@ class Usuario {
   String email;
   String? cpf;
   String? telefone;
-  String? senha; // Torna 'senha' opcional
-  bool administrador;
+  String? senha;
+  bool professor;
 
   Usuario({
     this.id,
@@ -15,25 +15,26 @@ class Usuario {
     required this.email,
     this.cpf,
     this.telefone,
-    this.senha, // Remove 'required' para tornar opcional
-    this.administrador = false,
+    this.senha,
+    this.professor = false
   });
 
   // Método para criar um objeto Usuario a partir de um JSON
   factory Usuario.fromJson(Map<String, dynamic> json) {
-    return Usuario(
-      id: json['id'],
-      nome: json['nome'],
-      dataNascimento: json['dataNascimento'] != null
-          ? DateTime.parse(json['dataNascimento'])
-          : null,
-      email: json['email'],
-      cpf: json['cpf'],
-      telefone: json['telefone'],
-      administrador: json['administrador'] ?? false,
-      senha: json['senha'], // Opcional: será `null` se não estiver no JSON
-    );
-  }
+  return Usuario(
+    id: json['id'],
+    nome: json['nome'],
+    dataNascimento: json['dataNascimento'] != null
+        ? DateTime.parse(json['dataNascimento'])
+        : null,
+    email: json['email'],
+    cpf: json['cpf'],
+    telefone: json['telefone'],
+    professor: json['professor'] ?? false, // Certifique-se do nome correto
+    senha: json['senha'], // Opcional
+  );
+}
+
 
   // Método para enviar apenas os dados necessários para registro
   Map<String, dynamic> toJsonRegistro() {

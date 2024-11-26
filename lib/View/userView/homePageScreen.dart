@@ -5,11 +5,11 @@ import 'package:texasgym_1/Controller/Usuario_controller.dart';
 import 'package:texasgym_1/Model/Medida_model.dart';
 import 'package:texasgym_1/Model/Usuario_Model.dart';
 import 'package:texasgym_1/View/TreinoView/FichaDeTreino.dart';
-import 'package:texasgym_1/View/exerciciosView/ExerciciosView.dart';
+import 'package:texasgym_1/View/admView/listUserView.dart';
+import 'package:texasgym_1/View/admView/paymentManagerScreen.dart';
+import 'package:texasgym_1/View/admView/workoutManagerScreen.dart';
 import 'package:texasgym_1/View/fichaView/FichaView.dart';
 import 'package:texasgym_1/View/paymentView/mercadopagoscreen.dart';
-import 'package:texasgym_1/View/configView/settingsScreen.dart';
-import 'package:texasgym_1/View/TreinoView/TreinoView.dart';
 import 'dart:io';
 import 'profileScreen.dart';
 import 'package:texasgym_1/View/views/loginScreen.dart';
@@ -37,14 +37,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
   }
 
   File? userProfileImage;
-
-  void _updateProgress(int treinos, int calorias, int horas) {
-    setState(() {
-      treinosCompletados += treinos;
-      caloriasQueimadas += calorias;
-      horasDeTreino += horas;
-    });
-  }
 
   Future<void> _navigateToProfile() async {
     if (_usuario != null) {
@@ -105,21 +97,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
               title: Text('Perfil'),
               onTap: _navigateToProfile,
             ),
-            // ListTile(
-            //   leading: Icon(Icons.fitness_center, color: Colors.black),
-            //   title: Text('Treinos'),
-            //   onTap: () {
-            //     Navigator.push(
-            //       context,
-            //       MaterialPageRoute(
-            //         builder: (context) => TrainingSheetScreen(
-            //           fichaId: _usuario?.id ??
-            //               0, // Substitua _usuario.id pelo ID correto da ficha
-            //         ),
-            //       ),
-            //     );
-            //   },
-            // ),
             ListTile(
               leading: Icon(Icons.note_alt_rounded, color: Colors.black),
               title: Text('Fichas'),
@@ -143,16 +120,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.payment, color: Colors.black),
-              title: Text('Pagamentos'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => MercadoPagoScreen()),
-                );
-              },
-            ),
-            ListTile(
               leading: Icon(Icons.airline_seat_recline_extra_rounded,
                   color: Colors.black),
               title: Text('Exercícios'),
@@ -170,16 +137,30 @@ class _HomePageScreenState extends State<HomePageScreen> {
                 );
               },
             ),
-            ListTile(
-              leading: Icon(Icons.settings, color: Colors.black),
-              title: Text('Configurações'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SettingsScreen()),
-                );
-              },
-            ),
+            if (_usuario?.professor == true) ...[
+              ListTile(
+                leading: Icon(Icons.fitness_center, color: Colors.black),
+                title: Text('Criar Treinos'),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => SendTrainingScreen()),
+                  );
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.payment, color: Colors.black),
+                title: Text('Gerenciar Pagamentos'),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => PaymentManagementScreen()),
+                  );
+                },
+              ),
+            ],
             Divider(),
             ListTile(
               leading: Icon(Icons.exit_to_app, color: Colors.red),
@@ -220,6 +201,44 @@ class _HomePageScreenState extends State<HomePageScreen> {
                       ],
                     ),
                     SizedBox(height: 10),
+                    if (_usuario!.professor == true) ...[
+                      _buildAdminOptionCard(
+                        'Criar Treinos para Usuários',
+                        Icons.fitness_center,
+                        () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SendTrainingScreen()),
+                          );
+                        },
+                      ),
+                      _buildAdminOptionCard(
+                        'Gerenciar Pagamentos dos Usuários',
+                        Icons.payment,
+                        () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    PaymentManagementScreen()),
+                          );
+                        },
+                      ),
+                      _buildAdminOptionCard(
+                        'Ver Usuarios',
+                        Icons.person,
+                        () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    UserListScreen()),
+                          );
+                        },
+                      ),
+                    ],
+                    SizedBox(height: 20),
                     Text(
                       'Aqui estão suas atividades recentes:',
                       style: TextStyle(
@@ -227,7 +246,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
                         color: Colors.grey[600],
                       ),
                     ),
-
                   ],
                 ),
               ),
@@ -373,13 +391,19 @@ class _HomePageScreenState extends State<HomePageScreen> {
     final token = prefs.getString('jwt_token');
 
     if (token != null) {
-      Usuario? usuario = await _usuarioController.getUsuario(token);
-      if (usuario != null) {
-        _fetchMedidas(usuario.id!); // Carrega as medidas do usuário logado
+      try {
+        Usuario? usuario = await _usuarioController.getUsuario(token);
+        if (usuario != null) {
+          setState(() {
+            _usuario = usuario;
+          });
+          _fetchMedidas(usuario.id!); // Carrega as medidas do usuário logado
+        } else {
+          print("Erro ao buscar os dados do usuário.");
+        }
+      } catch (e) {
+        print("Erro ao carregar usuário: $e");
       }
-      setState(() {
-        _usuario = usuario;
-      });
     } else {
       print("Token JWT não encontrado.");
     }
@@ -394,5 +418,22 @@ class _HomePageScreenState extends State<HomePageScreen> {
     setState(() {
       _medidas = medidas;
     });
+  }
+
+  Widget _buildAdminOptionCard(String text, IconData icon, VoidCallback onTap) {
+    return Card(
+      margin: EdgeInsets.only(bottom: 16),
+      child: ListTile(
+        leading: Icon(icon, color: Color(0xFF007BFF)),
+        title: Text(
+          text,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        onTap: onTap,
+      ),
+    );
   }
 }

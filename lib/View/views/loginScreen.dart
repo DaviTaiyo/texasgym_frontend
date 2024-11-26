@@ -16,38 +16,31 @@ class _LoginScreenState extends State<LoginScreen> {
   bool obscurePassword = true;
 
   Future<void> _login() async {
+  String email = emailController.text.trim();
+  String password = passwordController.text.trim();
 
-    String email = emailController.text;
-    String password = passwordController.text;
+  final response = await _usuarioController.login(email, password);
 
-    String? token = await _usuarioController.login(email, password);
+  if (response != null) {
+    final isProfessor = response['professor'];
 
-    if (token != null) {
-      // Verifique se o usuário é administrador, faça isso com uma função que pega o valor do token JWT decodificado.
-      bool isAdmin = await _verificarAdministrador(token);
-      if (isAdmin) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => AdminHomePageScreen()),
-        );
-      } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => HomePageScreen()),
-        );
-      }
+    print('Is Professor: $isProfessor');
+
+    if (isProfessor == true) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomePageScreen()),
+      );
     } else {
-      // Exibe um diálogo de erro em caso de falha no login
-      _mostrarDialogo('Erro de Login', 'E-mail ou senha inválidos.');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomePageScreen()),
+      );
     }
+  } else {
+    _mostrarDialogo('Erro de Login', 'E-mail ou senha inválidos.');
   }
-
-  Future<bool> _verificarAdministrador(String token) async {
-    // Aqui você decodifica o token JWT para verificar se o campo administrador é verdadeiro.
-    // Adicione lógica para verificar o payload do token (se já estiver incluído o valor administrador).
-    // Vamos simplificar isso no momento.
-    return false; // Ajuste isso conforme a necessidade do seu sistema
-  }
+}
 
   void _mostrarDialogo(String titulo, String conteudo) {
     showDialog(
@@ -138,6 +131,23 @@ class _LoginScreenState extends State<LoginScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+Widget _buildAdminOptionCard(String text, IconData icon, VoidCallback onTap) {
+    return Card(
+      margin: EdgeInsets.only(bottom: 16),
+      child: ListTile(
+        leading: Icon(icon, color: Color(0xFF007BFF)),
+        title: Text(
+          text,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        onTap: onTap,
       ),
     );
   }
