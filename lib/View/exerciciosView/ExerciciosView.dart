@@ -40,6 +40,27 @@ class _ExerciciosScreenState extends State<ExerciciosScreen> {
     });
   }
 
+  Future<void> _deleteExercicio(int exercicioId) async {
+    try {
+      final success = await _exercicioController.deletarExercicio(exercicioId);
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Exercício deletado com sucesso.')),
+        );
+        _refreshExercicios();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao deletar o exercício.')),
+        );
+      }
+    } catch (e) {
+      print('Erro ao deletar exercício: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro de conexão ao deletar o exercício.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,7 +96,18 @@ class _ExerciciosScreenState extends State<ExerciciosScreen> {
                   child: ListTile(
                     title: Text(exercicio.nome),
                     subtitle: Text(exercicio.descricao ?? "Sem descrição"),
-                    trailing: Icon(Icons.play_arrow),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            _confirmDelete(context, exercicio.id!);
+                          },
+                        ),
+                        Icon(Icons.play_arrow),
+                      ],
+                    ),
                     onTap: () {
                       _showExercicioDetails(context, exercicio);
                     },
@@ -104,7 +136,8 @@ class _ExerciciosScreenState extends State<ExerciciosScreen> {
               final result = await Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => CreateExercicioScreen(userId: widget.userId),
+                  builder: (context) =>
+                      CreateExercicioScreen(userId: widget.userId),
                 ),
               );
               if (result == true) {
@@ -144,6 +177,44 @@ class _ExerciciosScreenState extends State<ExerciciosScreen> {
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text('Fechar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Fecha o diálogo
+                _confirmDelete(context, exercicio.id!); // Confirma exclusão
+              },
+              child: Text(
+                'Deletar',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _confirmDelete(BuildContext context, int exercicioId) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Confirmar Exclusão'),
+          content: Text('Tem certeza que deseja excluir este exercício?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context); // Fecha o diálogo
+                await _deleteExercicio(exercicioId); // Chama o método de exclusão
+              },
+              child: Text(
+                'Excluir',
+                style: TextStyle(color: Colors.red),
+              ),
             ),
           ],
         );

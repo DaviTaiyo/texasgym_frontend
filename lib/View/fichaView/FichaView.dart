@@ -42,6 +42,29 @@ class _UserFichasScreenState extends State<UserFichasScreen> {
     }
   }
 
+  Future<void> _deleteFicha(int fichaId) async {
+    try {
+      final success = await _fichaController.deletarFicha(fichaId);
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Ficha deletada com sucesso.')),
+        );
+        setState(() {
+          _fichasFuture = _fetchFichas(); // Recarrega a lista após deletar
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao deletar a ficha.')),
+        );
+      }
+    } catch (e) {
+      print('Erro ao deletar ficha: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro de conexão ao deletar a ficha.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,9 +99,19 @@ class _UserFichasScreenState extends State<UserFichasScreen> {
                   margin: EdgeInsets.symmetric(vertical: 8),
                   child: ListTile(
                     title: Text(ficha['observacao']),
-                    trailing: Icon(Icons.arrow_forward),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            _confirmDelete(context, ficha['id']);
+                          },
+                        ),
+                        Icon(Icons.arrow_forward),
+                      ],
+                    ),
                     onTap: () {
-                      // Ação ao clicar na ficha (ex.: abrir detalhes)
                       _showFichaDetails(context, ficha);
                     },
                   ),
@@ -139,6 +172,44 @@ class _UserFichasScreenState extends State<UserFichasScreen> {
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text('Fechar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Fecha o diálogo
+                _confirmDelete(context, ficha['id']); // Exibe confirmação de deletar
+              },
+              child: Text(
+                'Deletar',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _confirmDelete(BuildContext context, int fichaId) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Confirmar Exclusão'),
+          content: Text('Tem certeza que deseja excluir esta ficha?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context); // Fecha o diálogo
+                await _deleteFicha(fichaId); // Chama o método para deletar
+              },
+              child: Text(
+                'Excluir',
+                style: TextStyle(color: Colors.red),
+              ),
             ),
           ],
         );

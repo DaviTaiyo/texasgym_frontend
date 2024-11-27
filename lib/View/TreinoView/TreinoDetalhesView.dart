@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:texasgym_1/Model/Treino_model.dart';
+import 'package:texasgym_1/View/TreinoView/EditTreinoScreen.dart'; // Import da tela de edição
 
 class TreinoDetalhesScreen extends StatelessWidget {
   final Treino treino;
@@ -12,6 +13,26 @@ class TreinoDetalhesScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('Detalhes do Treino'),
         backgroundColor: Colors.blue,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.edit),
+            onPressed: () async {
+              // Navega para a tela de edição e espera pelo resultado
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EditTreinoScreen(treino: treino),
+                ),
+              );
+
+              if (result == true) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Treino atualizado com sucesso!')),
+                );
+              }
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

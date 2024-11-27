@@ -176,6 +176,7 @@ class FichaController {
       client.close();
     }
   }
+
   //pegar ficha pelo Id do usuario
   Future<List<dynamic>?> getFichasByUserId(int userId) async {
   final prefs = await SharedPreferences.getInstance();

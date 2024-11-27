@@ -20,7 +20,6 @@ class _TreinoScreenState extends State<TreinoScreen> {
   @override
   void initState() {
     super.initState();
-    // Inicialmente, usar dados fixos para depuração
     _treinosFuture = _treinoController.getTreinosByFichaId(widget.fichaId);
   }
 
@@ -28,6 +27,55 @@ class _TreinoScreenState extends State<TreinoScreen> {
     setState(() {
       _treinosFuture = _treinoController.getTreinosByFichaId(widget.fichaId);
     });
+  }
+
+  Future<void> _deleteTreino(int treinoId) async {
+    try {
+      final success = await _treinoController.deleteTreino(treinoId);
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Treino deletado com sucesso.')),
+        );
+        _fetchDataFromApi(); // Recarregar treinos após exclusão
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao deletar treino.')),
+        );
+      }
+    } catch (e) {
+      print('Erro ao deletar treino: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro de conexão ao deletar treino.')),
+      );
+    }
+  }
+
+  void _confirmDelete(BuildContext context, int treinoId) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Confirmar Exclusão'),
+          content: Text('Tem certeza que deseja excluir este treino?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context); // Fechar o diálogo
+                await _deleteTreino(treinoId); // Deletar o treino
+              },
+              child: Text(
+                'Excluir',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -77,7 +125,18 @@ class _TreinoScreenState extends State<TreinoScreen> {
                             'Observação: ${treino.observacao ?? 'Não especificado'}'),
                       ],
                     ),
-                    trailing: Icon(Icons.arrow_forward),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            _confirmDelete(context, treino.id!);
+                          },
+                        ),
+                        Icon(Icons.arrow_forward),
+                      ],
+                    ),
                     onTap: () {
                       Navigator.push(
                         context,
@@ -96,13 +155,12 @@ class _TreinoScreenState extends State<TreinoScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navegar para a tela de criação
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => CreateTreinoScreen(fichaId: widget.fichaId),
             ),
-          ).then((_) => _fetchDataFromApi()); // Atualizar lista após criação
+          ).then((_) => _fetchDataFromApi());
         },
         child: Icon(Icons.add),
         backgroundColor: Colors.blue,
