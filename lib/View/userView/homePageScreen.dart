@@ -4,6 +4,7 @@ import 'package:texasgym_1/Controller/Medida_controller.dart';
 import 'package:texasgym_1/Controller/Usuario_controller.dart';
 import 'package:texasgym_1/Model/Medida_model.dart';
 import 'package:texasgym_1/Model/Usuario_Model.dart';
+import 'package:texasgym_1/View/RelatorioView/RelatorioView.dart';
 import 'package:texasgym_1/View/TreinoView/FichaDeTreino.dart';
 import 'package:texasgym_1/View/admView/listUserView.dart';
 import 'package:texasgym_1/View/admView/paymentManagerScreen.dart';
@@ -226,6 +227,17 @@ class _HomePageScreenState extends State<HomePageScreen> {
                           );
                         },
                       ),
+                       _buildAdminOptionCard(
+                        'Relatorios',
+                        Icons.sticky_note_2_rounded,
+                        () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => RelatorioScreen()),
+                          );
+                        },
+                      )
                     ],
                   ],
                 ),
