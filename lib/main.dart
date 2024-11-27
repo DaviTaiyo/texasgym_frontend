@@ -13,6 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: navigatorKey,
+      debugShowCheckedModeBanner: true,
       title: 'Texas Gym',
       theme: ThemeData(
         primarySwatch: Colors.purple,

@@ -1,102 +1,81 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:texasgym_1/Controller/Usuario_controller.dart';
+import 'package:texasgym_1/Model/Usuario_Model.dart';
 
-class EditProfileScreen extends StatefulWidget {
-  final String name;
-  final String phone;
-  final String cpf;
-  final String email;
-  final DateTime birthDate; // Ajustado para usar DateTime
-  final int userId; // Adicionado ID do usuário
+class EditUserScreen extends StatefulWidget {
+  final Usuario usuario;
 
-  EditProfileScreen({
-    required this.name,
-    required this.phone,
-    required this.email,
-    required this.cpf,
-    required this.birthDate,
-    required this.userId, // Recebe o ID do usuário
-  });
+  EditUserScreen({required this.usuario});
 
   @override
-  _EditProfileScreenState createState() => _EditProfileScreenState();
+  _EditUserScreenState createState() => _EditUserScreenState();
 }
 
-class _EditProfileScreenState extends State<EditProfileScreen> {
+class _EditUserScreenState extends State<EditUserScreen> {
   final _formKey = GlobalKey<FormState>();
   final UsuarioController _usuarioController = UsuarioController();
 
-  late TextEditingController nameController;
-  late TextEditingController phoneController;
-  late TextEditingController cpfController;
-  late TextEditingController emailController;
-  late TextEditingController birthDateController;
+  late TextEditingController _nameController;
+  late TextEditingController _emailController;
+  late TextEditingController _phoneController;
+  late TextEditingController _cpfController;
+  bool _isProfessor = false;
 
   @override
   void initState() {
     super.initState();
-    nameController = TextEditingController(text: widget.name);
-    phoneController = TextEditingController(text: widget.phone);
-    emailController = TextEditingController(text: widget.email);
-    cpfController = TextEditingController(text: widget.cpf);
-    birthDateController = TextEditingController(
-      text: DateFormat('dd/MM/yyyy').format(widget.birthDate),
-    );
+    _nameController = TextEditingController(text: widget.usuario.nome ?? '');
+    _emailController = TextEditingController(text: widget.usuario.email);
+    _phoneController =
+        TextEditingController(text: widget.usuario.telefone ?? '');
+    _cpfController = TextEditingController(text: widget.usuario.cpf ?? '');
+    _isProfessor = widget.usuario.professor;
   }
 
-  Future<void> _updateProfile() async {
+  Future<void> _updateUser() async {
     if (_formKey.currentState!.validate()) {
-      try {
-        // Converte a data do campo de texto para DateTime
-        final DateTime birthDate =
-            DateFormat('dd/MM/yyyy').parse(birthDateController.text);
+      final updatedUser = Usuario(
+        id: widget.usuario.id,
+        nome: _nameController.text,
+        email: _emailController.text,
+        telefone: _phoneController.text,
+        cpf: _cpfController.text,
+        professor: _isProfessor,
+      );
 
-        // Atualiza o perfil do usuário
-        final updated = await _usuarioController.atualizarUsuario(
-          name: nameController.text,
-          phone: phoneController.text,
-          cpf: cpfController.text,
-          email: emailController.text,
-          birthDate: birthDate,
-          userId: widget.userId, // Passa o ID do usuário
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final token = prefs.getString('jwt_token');
+
+        if (token == null) {
+          throw Exception('Token JWT não encontrado.');
+        }
+
+        final success = await _usuarioController.atualizarUsuario(
+          name: updatedUser.nome!,
+          phone: updatedUser.telefone!,
+          email: updatedUser.email,
+          cpf: updatedUser.cpf!,
+          birthDate: widget.usuario.dataNascimento ?? DateTime.now(),
+          userId: updatedUser.id!,
+          professor: _isProfessor,
         );
 
-        if (updated) {
+        if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Perfil atualizado com sucesso!')),
+            SnackBar(content: Text('Usuário atualizado com sucesso!')),
           );
-          Navigator.pop(context, {
-            'name': nameController.text,
-            'phone': phoneController.text,
-            'cpf': cpfController.text,
-            'email': emailController.text,
-            'birthDate': birthDate,
-          });
+          Navigator.pop(context); // Retorna à tela anterior
         } else {
-          throw Exception('Erro ao atualizar o perfil.');
+          throw Exception('Erro ao atualizar o usuário.');
         }
       } catch (e) {
-        print('Erro: $e');
+        print('Erro ao atualizar usuário: $e');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao atualizar o perfil.')),
+          SnackBar(content: Text('Erro ao atualizar usuário: $e')),
         );
       }
-    }
-  }
-
-  Future<void> _pickDate() async {
-    DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
-    );
-
-    if (pickedDate != null) {
-      setState(() {
-        birthDateController.text = DateFormat('dd/MM/yyyy').format(pickedDate);
-      });
     }
   }
 
@@ -104,7 +83,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Editar Perfil'),
+        title: Text('Editar Usuário'),
         backgroundColor: Colors.blue,
       ),
       body: Padding(
@@ -114,36 +93,37 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           child: ListView(
             children: [
               _buildInputField(
-                controller: nameController,
+                controller: _nameController,
                 label: "Nome",
                 icon: Icons.person,
                 keyboardType: TextInputType.text,
                 validatorMessage: "Informe o nome",
               ),
               _buildInputField(
-                  controller: cpfController,
-                  label: "CPF",
-                  icon: Icons.document_scanner,
-                  keyboardType: TextInputType.number,
-                  validatorMessage: "Informe o CPF"),
+                controller: _cpfController,
+                label: "CPF",
+                icon: Icons.document_scanner,
+                keyboardType: TextInputType.number,
+                validatorMessage: "Informe o CPF",
+              ),
               _buildInputField(
-                controller: phoneController,
+                controller: _phoneController,
                 label: "Telefone",
                 icon: Icons.phone,
                 keyboardType: TextInputType.phone,
                 validatorMessage: "Informe o telefone",
               ),
               _buildInputField(
-                controller: emailController,
+                controller: _emailController,
                 label: "Email",
                 icon: Icons.email,
                 keyboardType: TextInputType.emailAddress,
                 validatorMessage: "Informe o email",
               ),
-              _buildDateField(),
+              _isProfessor == true ? _buildSwitchField() : SizedBox(),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _updateProfile,
+                onPressed: _updateUser,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   padding: EdgeInsets.symmetric(vertical: 12),
@@ -194,30 +174,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Widget _buildDateField() {
+  Widget _buildSwitchField() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         children: [
-          Icon(Icons.calendar_today, size: 30, color: Colors.blue),
+          Icon(Icons.school, size: 30, color: Colors.blue),
           SizedBox(width: 16),
           Expanded(
-            child: TextFormField(
-              controller: birthDateController,
-              decoration: InputDecoration(
-                labelText: "Data de Nascimento",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              readOnly: true,
-              onTap: _pickDate,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Informe a data de nascimento';
-                }
-                return null;
+            child: SwitchListTile(
+              title: Text('Professor'),
+              value: _isProfessor,
+              onChanged: (value) {
+                setState(() {
+                  _isProfessor = value;
+                });
               },
+              activeColor: Colors.blue,
             ),
           ),
         ],

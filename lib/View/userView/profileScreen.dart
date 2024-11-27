@@ -1,27 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:texasgym_1/Model/Usuario_Model.dart';
 import 'package:texasgym_1/View/userView/EditProfileScreen.dart';
-import 'dart:io';
 import 'package:texasgym_1/View/MedidasView/Medidas_screen.dart';
+import 'dart:io';
 
 class ProfileScreen extends StatefulWidget {
   final String name;
   final String phone;
   final String email;
   final String cpf;
-  final DateTime birthDate; // Alterado para usar a data de nascimento
+  final DateTime birthDate;
   final File? profileImage;
   final int userId;
+  final bool professor;
 
   ProfileScreen({
     required this.name,
     required this.phone,
     required this.email,
     required this.cpf,
-    required this.birthDate, // Usando a data de nascimento diretamente
+    required this.birthDate,
     required this.profileImage,
     required this.userId,
+    required this.professor,
   });
 
   @override
@@ -33,8 +36,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late String phone;
   late String cpf;
   late String email;
-  late DateTime birthDate; // Alterado para armazenar a data de nascimento
+  late DateTime birthDate;
   late File? profileImage;
+  late bool professor;
 
   final ImagePicker _picker = ImagePicker();
 
@@ -47,13 +51,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     cpf = widget.cpf;
     birthDate = widget.birthDate;
     profileImage = widget.profileImage;
+    professor = widget.professor;
   }
 
   int _calculateAge(DateTime birthDate) {
     final currentDate = DateTime.now();
     int age = currentDate.year - birthDate.year;
     if (currentDate.month < birthDate.month ||
-        (currentDate.month == birthDate.month && currentDate.day < birthDate.day)) {
+        (currentDate.month == birthDate.month &&
+            currentDate.day < birthDate.day)) {
       age--;
     }
     return age;
@@ -109,6 +115,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               title: Text('Idade'),
               subtitle: Text('${_calculateAge(birthDate)} anos'),
             ),
+            ListTile(
+              leading: Icon(Icons.school),
+              title: Text('Professor'),
+              subtitle: Text(professor ? 'Sim' : 'Não'),
+            ),
           ],
         ),
       ),
@@ -139,16 +150,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
               final updatedData = await Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => EditProfileScreen(
-                    userId: widget.userId, // Passa o ID do usuário
-                    name: name,
-                    cpf: cpf,
-                    phone: phone,
-                    email: email,
-                    birthDate: birthDate, // Passa a data de nascimento para edição
+                  builder: (context) => EditUserScreen(
+                    usuario: Usuario(
+                      id: widget.userId,
+                      nome: name,
+                      telefone: phone,
+                      email: email,
+                      cpf: cpf,
+                      dataNascimento: birthDate,
+                      professor: professor,
+                    ),
                   ),
                 ),
               );
+              if (updatedData != null) {
+                setState(() {
+                  name = updatedData['name'];
+                  phone = updatedData['phone'];
+                  cpf = updatedData['cpf'];
+                  email = updatedData['email'];
+                  birthDate = updatedData['birthDate'];
+                  professor = updatedData['professor'];
+                });
+              }
             },
           ),
         ],

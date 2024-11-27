@@ -39,7 +39,6 @@ dependencies:
   dart_jsonwebtoken: ^2.1.1
   flutter_speed_dial: ^5.0.0+1
   youtube_player_flutter: ^8.1.0
-  flutter_local_notifications: ^13.0.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

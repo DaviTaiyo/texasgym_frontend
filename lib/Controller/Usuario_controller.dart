@@ -257,7 +257,8 @@ Future<bool> atualizarUsuario({
   required String email,
   required String cpf,
   required DateTime birthDate,
-  required int userId, // Adiciona o ID do usuário
+  required int userId,
+  required bool professor, // Adiciona o campo professor
 }) async {
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('jwt_token');
@@ -265,15 +266,16 @@ Future<bool> atualizarUsuario({
   if (token == null) {
     throw Exception('Token JWT não encontrado.');
   }
-  final url = Uri.parse('$apiUrl/atualizar/$userId'); // Inclui o ID na rota
+
+  final url = Uri.parse('$apiUrl/atualizar/$userId');
   final body = jsonEncode({
-  'nome': name,
-  'telefone': phone,
-  'email': email,
-  'cpf': cpf,
-  'dataNascimento': DateFormat('yyyy-MM-dd').format(birthDate),
-  'senha': "1"
-});
+    'nome': name,
+    'telefone': phone,
+    'email': email,
+    'cpf': cpf,
+    'dataNascimento': DateFormat('yyyy-MM-dd').format(birthDate),
+    'professor': professor, // Adiciona o campo professor
+  });
 
   try {
     final response = await _getHttpClient().put(
@@ -291,4 +293,5 @@ Future<bool> atualizarUsuario({
     return false;
   }
 }
+
 }

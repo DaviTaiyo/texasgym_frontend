@@ -8,6 +8,7 @@ import 'package:texasgym_1/View/RelatorioView/RelatorioView.dart';
 import 'package:texasgym_1/View/TreinoView/FichaDeTreino.dart';
 import 'package:texasgym_1/View/admView/listUserView.dart';
 import 'package:texasgym_1/View/admView/paymentManagerScreen.dart';
+import 'package:texasgym_1/View/exerciciosView/ExerciciosView.dart';
 import 'package:texasgym_1/View/fichaView/FichaView.dart';
 import 'package:texasgym_1/View/userView/UserPaymentScreen.dart';
 import 'dart:io';
@@ -51,6 +52,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
             email: _usuario!.email!,
             birthDate: _usuario!.dataNascimento!,
             profileImage: userProfileImage,
+            professor: _usuario!.professor,
           ),
         ),
       );
@@ -70,7 +72,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Texas Gym'),
+        title: Text('Bem vindo ${_usuario?.nome}'),
         backgroundColor: Colors.blue,
       ),
       drawer: Drawer(
@@ -127,13 +129,9 @@ class _HomePageScreenState extends State<HomePageScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => FichaTreinoScreen(
-                        userId: _usuario!.id!,
-                        name: _usuario!.nome!,
-                        phone: _usuario!.telefone!,
-                        email: _usuario!.email!,
-                        cpf: _usuario!.cpf!),
-                  ),
+                      builder: (context) => ExerciciosScreen(
+                            userId: _usuario!.id!,
+                          )),
                 );
               },
             ),
@@ -176,73 +174,220 @@ class _HomePageScreenState extends State<HomePageScreen> {
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          'Bem-vindo ',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                      child: Text(
+                    "Aqui estão alguns atalhos para você",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  )),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  _buildDashboardCard(
+                    title: "Treinos",
+                    value: "Aqui você encontra seus treinos",
+                    icon: Icons.fitness_center,
+                    color: Colors.green,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => FichaTreinoScreen(
+                              userId: _usuario!.id!,
+                              name: _usuario!.nome!,
+                              phone: _usuario!.telefone!,
+                              email: _usuario!.email!,
+                              cpf: _usuario!.cpf!),
                         ),
-                        Text(
-                          _usuario?.nome ?? "Não disponível",
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ],
+                      );
+                    },
+                  ),
+                  _buildDashboardCard(
+                    title: "Pagamentos",
+                    value: "Verifique sua mensalidade",
+                    icon: Icons.payment,
+                    color: Colors.green,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => PaymentManagementScreen()),
+                      );
+                    },
+                  ),
+                  if (_usuario!.professor == true) ...[
+                    Divider(),
+                    Center(
+                      child: Text(
+                        "Atalhos de Administrador",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ),
-                    SizedBox(height: 10),
-                    if (_usuario!.professor == true) ...[
-                      _buildAdminOptionCard(
-                        'Gerenciar Pagamentos dos Usuários',
-                        Icons.payment,
-                        () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    PaymentManagementScreen()),
-                          );
-                        },
-                      ),
-                      _buildAdminOptionCard(
-                        'Ver e Editar Usuarios',
-                        Icons.person,
-                        () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => UserListScreen()),
-                          );
-                        },
-                      ),
-                       _buildAdminOptionCard(
-                        'Relatorios',
-                        Icons.sticky_note_2_rounded,
-                        () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => RelatorioScreen()),
-                          );
-                        },
-                      )
-                    ],
+                    SizedBox(
+                      height: 10,
+                    ),
+                    _buildDashboardCard(
+                      title: "Gerenciar Pagamentos dos Usuarios",
+                      value: "Administre os pagamentos dos Usuarios",
+                      icon: Icons.payment,
+                      color: Colors.blue,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => PaymentManagementScreen()),
+                        );
+                      },
+                    ),
+                    _buildDashboardCard(
+                      title: "Usuarios",
+                      value: "Veja e edite todos os Usuarios",
+                      icon: Icons.person,
+                      color: Colors.blue,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => UserListScreen()),
+                        );
+                      },
+                    ),
+                    _buildDashboardCard(
+                      title: "Relatorios",
+                      value: "Veja Todos os Relatorios e dados",
+                      icon: Icons.person,
+                      color: Colors.blue,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => RelatorioScreen()),
+                        );
+                      },
+                    ),
                   ],
-                ),
+                  Spacer(),
+                  Card(
+                    child: Container(
+                      color: Colors.blue,
+                      width: double.infinity,
+                      padding: EdgeInsets.all(16.0),
+                      child: Center(
+                        child: Text(
+                          "ACADEMIA TEXAS GYM",
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                ],
               ),
             ),
+    );
+  }
+
+  Widget _buildQuickAccessRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _buildQuickAccessButton(
+          title: "Treinos",
+          icon: Icons.fitness_center,
+          color: Colors.blue,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => FichaTreinoScreen(
+                    userId: _usuario!.id!,
+                    name: _usuario!.nome!,
+                    phone: _usuario!.telefone!,
+                    email: _usuario!.email!,
+                    cpf: _usuario!.cpf!),
+              ),
+            );
+          },
+        ),
+        _buildQuickAccessButton(
+          title: "Pagamentos",
+          icon: Icons.payment,
+          color: Colors.green,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => PaymentManagementScreen()),
+            );
+          },
+        ),
+        _buildQuickAccessButton(
+          title: "Perfil",
+          icon: Icons.person,
+          color: Colors.orange,
+          onTap: () {
+            _navigateToProfile;
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDashboardCard({
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Card(
+        margin: EdgeInsets.only(bottom: 16),
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: ListTile(
+          leading: CircleAvatar(
+            backgroundColor: color.withOpacity(0.2),
+            child: Icon(icon, color: color),
+          ),
+          title: Text(title,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          subtitle: Text(value,
+              style: TextStyle(fontSize: 14, color: Colors.black54)),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickAccessButton({
+    required String title,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: 30,
+            backgroundColor: color.withOpacity(0.2),
+            child: Icon(icon, color: color, size: 28),
+          ),
+          SizedBox(height: 8),
+          Text(title,
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+        ],
+      ),
     );
   }
 

@@ -58,6 +58,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
           cpf: updatedUser.cpf!,
           birthDate: widget.usuario.dataNascimento ?? DateTime.now(),
           userId: updatedUser.id!,
+          professor: updatedUser.professor
         );
 
         if (success) {
